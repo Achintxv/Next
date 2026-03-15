@@ -1,12 +1,28 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion"; // Add these
 import Dropdown from "./Dropdown";
+import { MdDeleteForever } from "react-icons/md";
 
 export default function ExpandableList({ issue, fetchIssue }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("");
   const [openIndex, setOpenIndex] = useState(null);
+
+  
+  const handleDelete = async(id) => {
+    await fetch(`/api/user?id=${id}`,{
+      method:"DELETE",
+      headers:{
+        "Content-Type": "application-json"
+      },
+      body: JSON.stringify({ id }),
+    });
+    
+    await fetchIssue();
+  }
+  
+  
 
   const handleChanges = async (e, id) => {
     e.preventDefault();
@@ -40,11 +56,11 @@ export default function ExpandableList({ issue, fetchIssue }) {
 
   return (
     <div className="bg-zinc-900 text-white mx-auto rounded-md overflow-hidden border border-white/5">
-      <div className="flex justify-between px-4 py-2 border-b border-zinc-700 text-zinc-400 text-xs uppercase tracking-wider">
+      <div className="flex justify-between px-5 py-2 border-b border-zinc-700 text-zinc-400 text-xs uppercase tracking-wider">
         <h1 className="w-1/4">Issue</h1>
         <h1 className="w-1/4">Description</h1>
-        <h1 className="w-1/4 text-center">Status</h1>
-        <h1 className="w-1/4 text-right">Action</h1>
+        <h1 className="w-1/4 flex justify-center">Status</h1>
+        <h1 className="w-1/4 flex justify-end">Delete</h1>
       </div>
 
       {issue.map((item, index) => {
@@ -56,20 +72,21 @@ export default function ExpandableList({ issue, fetchIssue }) {
               onClick={() => toggle(index)}
               className="w-full flex items-center justify-between px-5 py-4  text-left hover:bg-white/5 transition-colors"
             >
-              <span className="w-1/4 truncate pr-4 text-sm font-medium">{item.title}</span>
-              <span className="w-1/4 truncate pr-4 text-sm text-zinc-400">{item.description}</span>
+              <span className="w-1/4 truncate text-sm font-medium">{item.title}</span>
+              <span className="w-1/4 truncate  text-sm text-zinc-400">{item.description}</span>
               <div className="w-1/4 flex justify-center">
-                <span className={`text-xs font-bold px-2 py-1 rounded-md ${statusColors[item.status] || "bg-zinc-700 text-white"}`}>
+                <span className={`text-xs  font-bold px-2 py-1 rounded-md ${statusColors[item.status] || "bg-zinc-700 text-white"}`}>
                   {item.status}
                 </span>
               </div>
-              <motion.span
-                className="w-1/4 text-right inline-block"
-              >
-                <span className={`text-xs font-bold px-2 py-1 rounded-md`}>
-                  {item.timestamps}
+                <span className={`w-1/4 flex justify-end text-xs px-2 py-1 rounded-md`}>
+                  
+                    <MdDeleteForever className="text-xl cursor-pointer" onClick={(e)=>{
+                      e.stopPropagation();
+                      handleDelete(item._id);
+                    }}/>
+                  
                 </span>
-              </motion.span>
             </button>
 
             {/* AnimatePresence allows elements to animate as they leave the DOM */}
