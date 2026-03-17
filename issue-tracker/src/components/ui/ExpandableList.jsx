@@ -21,8 +21,6 @@ export default function ExpandableList({ issue, fetchIssue }) {
     
     await fetchIssue();
   }
-  
-  
 
   const handleChanges = async (e, id) => {
     e.preventDefault();

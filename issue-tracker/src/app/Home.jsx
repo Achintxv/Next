@@ -90,7 +90,7 @@ const Home = () => {
             <h1 className="font-semibold text-2xl flex items-center gap-2 hover:text-zinc-500">Latest Issues <FaExternalLinkAlt className="text-[18px]"/>
 </h1>
           </a>
-          <div className="flex flex-col gap-1 h-83 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-zinc-600">
+          <div className="flex flex-col gap-1 h-83 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-zinc-600 bg-zinc-900 p-1 rounded-md">
             {[...Data].reverse().map((i) => (
               <div
                 key={i._id}

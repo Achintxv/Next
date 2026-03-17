@@ -8,11 +8,11 @@ const page = () => {
     <div className="flex flex-col gap-2">
       <div className="">
         <Link
-  href="/issues"
-  className="text-white hover:text-zinc-600 inline-flex items-center gap-1"
->
-  <IoIosArrowBack /> Go back
-</Link>
+          href="/issues"
+          className="text-white hover:text-zinc-600 inline-flex items-center gap-1"
+        >
+          <IoIosArrowBack /> Go back
+        </Link>
       </div>
 
       <div className="flex flex-col">
