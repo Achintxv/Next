@@ -163,7 +163,7 @@ GEMINI_API_KEY=your_api_key
 ### 1️⃣ Clone the repository
 
 ```
-git clone 
+git clone git@github.com:Achintxv/Next.git
 cd project-folder
 ```
 
