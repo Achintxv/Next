@@ -31,14 +31,186 @@ export default function PhotoPrint({
     return () => clearTimeout(timer);
   }, []);
 
-  const downloadImage = () => {
-    const link = document.createElement("a");
+  const downloadImage = async () => {
+  if (!image) return;
 
-    link.href = image;
-    link.download = `kapture-${Date.now()}.png`;
+  const photo = new Image();
 
-    link.click();
+  photo.onload = () => {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    // --------------------------------
+    // FINAL FILM DIMENSIONS
+    // --------------------------------
+
+    const width = 1200;
+
+    // White border around the photo
+    const sideBorder = 70;
+    const topBorder = 70;
+
+    // Actual photograph dimensions
+    const photoWidth = width - sideBorder * 2;
+    const photoHeight = 900;
+
+    // Extra bottom film area
+    const bottomFilm = 210;
+
+    const height =
+      topBorder +
+      photoHeight +
+      bottomFilm;
+
+    canvas.width = width;
+    canvas.height = height;
+
+    // --------------------------------
+    // WHITE FILM
+    // --------------------------------
+
+    ctx.fillStyle = "#FFFFFF";
+
+    ctx.fillRect(
+      0,
+      0,
+      width,
+      height
+    );
+
+    // --------------------------------
+    // PHOTO
+    // --------------------------------
+
+    const photoRatio =
+      photo.naturalWidth /
+      photo.naturalHeight;
+
+    const targetRatio =
+      photoWidth /
+      photoHeight;
+
+    let sx = 0;
+    let sy = 0;
+    let sw = photo.naturalWidth;
+    let sh = photo.naturalHeight;
+
+    if (photoRatio > targetRatio) {
+      // Crop left/right
+      sw =
+        photo.naturalHeight *
+        targetRatio;
+
+      sx =
+        (photo.naturalWidth - sw) / 2;
+    } else {
+      // Crop top/bottom
+      sh =
+        photo.naturalWidth /
+        targetRatio;
+
+      sy =
+        (photo.naturalHeight - sh) / 2;
+    }
+
+    // Draw photo INSIDE the film
+    ctx.drawImage(
+      photo,
+
+      // Source
+      sx,
+      sy,
+      sw,
+      sh,
+
+      // Destination
+      sideBorder,
+      topBorder,
+      photoWidth,
+      photoHeight
+    );
+
+    // --------------------------------
+    // KAPTURE
+    // --------------------------------
+
+    ctx.fillStyle = "#292522";
+
+    ctx.font =
+      "bold 30px monospace";
+
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+
+    ctx.fillText(
+      "KAPTURE",
+      sideBorder,
+      topBorder +
+        photoHeight +
+        70
+    );
+
+    // --------------------------------
+    // DATE
+    // --------------------------------
+
+    ctx.fillStyle = "#756E67";
+
+    ctx.font =
+      "20px monospace";
+
+    ctx.fillText(
+      date.toUpperCase(),
+      sideBorder,
+      topBorder +
+        photoHeight +
+        120
+    );
+
+    // --------------------------------
+    // TIME
+    // --------------------------------
+
+    ctx.textAlign = "right";
+
+    ctx.fillText(
+      time,
+      width - sideBorder,
+      topBorder +
+        photoHeight +
+        120
+    );
+
+    // --------------------------------
+    // DOWNLOAD
+    // --------------------------------
+
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+
+      const url =
+        URL.createObjectURL(blob);
+
+      const link =
+        document.createElement("a");
+
+      link.href = url;
+
+      link.download =
+        `kapture-${Date.now()}.png`;
+
+      document.body.appendChild(link);
+
+      link.click();
+
+      link.remove();
+
+      URL.revokeObjectURL(url);
+    }, "image/png");
   };
+
+  photo.src = image;
+};
 
   return (
     <section
