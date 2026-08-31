@@ -1,91 +1,136 @@
-"use client"
-import Calculator from '@/components/Calculator'
-import PlayfulTodolist from '@/components/PlayfulTodolist'
-import Profile from '@/components/Profile'
-import { useEffect } from "react";
+"use client";
+
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import React from 'react'
-import KanbanBoard from '@/components/KanbanBoard';
-import MusicPlayer from '@/components/MusicPlayer';
-import LiveSports from '@/components/LiveSports';
-import Pomodoro from '@/components/Pomodoro';
-import QuickAI from '@/components/QuickAi';
 
-const page = () => {
-  const router = useRouter();
+import Calculator from "@/components/Calculator";
+import PlayfulTodolist from "@/components/PlayfulTodolist";
+import Profile from "@/components/Profile";
+import KanbanBoard from "@/components/KanbanBoard";
+import MusicPlayer from "@/components/MusicPlayer";
+import LiveSports from "@/components/LiveSports";
+import Pomodoro from "@/components/Pomodoro";
+import QuickAI from "@/components/QuickAi";
+import { LuListTodo } from "react-icons/lu";
+import { MdCalculate } from "react-icons/md";
+import { IoMusicalNotes } from "react-icons/io5";
+import { MdOutlineSportsCricket } from "react-icons/md";
+import { TbPlant } from "react-icons/tb";
+import { GiArtificialIntelligence } from "react-icons/gi";
 
-  useEffect(() => {
-  const token = localStorage.getItem("token");
+const widgets = [
+{
+id: "todo",
+label: <LuListTodo />,
+component: <PlayfulTodolist />,
+},
+{
+id: "calculator",
+label: <MdCalculate />,
+component: <Calculator />,
+},
+{
+id: "music",
+label: <IoMusicalNotes />,
+component: <MusicPlayer />,
+},
+{
+id: "sports",
+label: <MdOutlineSportsCricket />,
+component: <LiveSports />,
+},
+{
+id: "pomodoro",
+label: <TbPlant />,
+component: <Pomodoro />,
+},
+{
+id: "ai",
+label: <GiArtificialIntelligence />,
+component: <QuickAI />,
+},
+];
 
-  if (!token) {
-    router.replace("/auth/login");
-  }
+export default function Page() {
+const router = useRouter();
+const [activeWidget, setActiveWidget] = useState("todo");
+
+useEffect(() => {
+const token = localStorage.getItem("token");
+
+if (!token) {
+  router.replace("/auth/login");
+}
+
 }, [router]);
 
-  return (
-    <div className="h-screen w-full p-3 bg-zinc-900">
+const selectedWidget = widgets.find(
+(widget) => widget.id === activeWidget
+);
 
-      {/* MAIN WRAPPER */}
-      <div className="flex flex-col lg:flex-row gap-3 h-full">
+return ( <div className="h-screen w-full p-3 bg-zinc-900 overflow-hidden">
 
-        {/* LEFT PANEL */}
-        <div className="w-full lg:w-1/4 flex flex-col gap-3 h-full">
+  {/* MAIN 30 / 70 WORKSPACE */}
+  <div className="flex h-full gap-3">
 
-          {/* FIXED HEIGHT TOP WIDGET */}
-          <div className="h-48 rounded-xl overflow-hidden shadow">
-            <Calculator />
-          </div>
+    {/* =====================================================
+        LEFT 30%
+    ====================================================== */}
+    <aside className="w-[25%] min-w-0 h-full flex flex-col gap-3">
 
-          {/* REST TAKES REMAINING SPACE */}
-          <div className="flex-1 rounded-xl overflow-hidden shadow">
-            <PlayfulTodolist />
+      {/* PROFILE - FIXED TOP */}
+      <div className="shrink-0 h-40 rounded-xl overflow-hidden bg-zinc-800 shadow">
+        <Profile />
+      </div>
+
+      {/* WIDGET AREA */}
+      <div className="flex-1 min-h-0 rounded-xl bg-zinc-800 overflow-hidden shadow flex flex-col">
+
+        {/* WIDGET BUTTONS */}
+        <div className="shrink-0 p-2 border-b border-zinc-700">
+          <div className="grid grid-cols-6 gap-1">
+
+            {widgets.map((widget) => (
+              <button
+                key={widget.id}
+                onClick={() => setActiveWidget(widget.id)}
+                className={`
+                  h-9 rounded-lg text-2xl flex items-center justify-center font-medium
+                  transition-all duration-200
+                  ${
+                    activeWidget === widget.id
+                      ? "bg-white text-zinc-900"
+                      : "bg-zinc-700 text-zinc-300 hover:bg-zinc-600 hover:text-white"
+                  }
+                `}
+              >
+                {widget.label}
+              </button>
+            ))}
+
           </div>
         </div>
 
-        {/* CENTER PANEL */}
-        <div className="w-full lg:w-1/2 flex flex-col gap-3 h-full">
-
-          <div className="h-35 flex gap-2 text-white">
-
-            <div className="flex-1 bg-zinc-800 rounded-xl flex items-center justify-center">
-              <MusicPlayer></MusicPlayer>
-            </div>
-
-            <div className="flex-1 bg-zinc-800 rounded-xl flex items-center justify-center">
-              <Profile></Profile>
-            </div>
-
-            <div className="flex-1 bg-zinc-800 rounded-xl flex items-center justify-center">
-              <LiveSports></LiveSports>
-            </div>
-
-          </div>
-
-          {/* MAIN CONTENT (fills remaining height) */}
-          <div className="flex-1 bg-zinc-800 text-white rounded-xl overflow-hidden">
-            <KanbanBoard></KanbanBoard>
-          </div>
-
-        </div>
-
-        {/* RIGHT PANEL */}
-        <div className="w-full lg:w-1/4 flex flex-col gap-3 h-full">
-
-          {/* FIXED HEIGHT (same as calculator) */}
-          <div className="h-48 bg-zinc-800 rounded-xl shadow flex items-center justify-center text-white">
-            <Pomodoro></Pomodoro>
-          </div>
-
-          {/* REST FILLS HEIGHT */}
-          <div className="flex-1 bg-zinc-800 rounded-xl overflow-hidden shadow text-white">
-            <QuickAI />
-          </div>
-
+        {/* ACTIVE WIDGET */}
+        <div className="flex-1 min-h-0 overflow-auto">
+          {selectedWidget?.component}
         </div>
 
       </div>
-    </div>
-  )
-}
+    </aside>
 
-export default page
+
+    {/* =====================================================
+        RIGHT 70% - KANBAN
+    ====================================================== */}
+    <main className="w-[85%] min-w-0 h-full rounded-xl bg-zinc-800 overflow-hidden shadow">
+
+      <KanbanBoard />
+
+    </main>
+
+  </div>
+</div>
+
+);
+}

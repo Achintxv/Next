@@ -1,4 +1,4 @@
-# 🚀 The Workspace
+# 🚀 Kanto
 
 A full-stack productivity web application that combines everyday tools into a single, clean dashboard.
 Built using **Next.js, Node.js, Express, and MongoDB**, this app helps users manage tasks, track ideas, stay focused, and get quick AI assistance — all in one place.

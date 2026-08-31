@@ -33,7 +33,6 @@ export const getTasks = async (req, res) => {
 };
 
 
-
 // DELETE TASK
 export const deleteTask = async (req, res) => {
   try {

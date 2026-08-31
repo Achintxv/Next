@@ -79,7 +79,7 @@ const Profile = () => {
 
         {/* Email */}
         <p className="text-xs text-zinc-400 text-center break-all">
-          {user?.email || "user@email.com"}
+          {user?.email || "user@gmail.com"}
         </p>
 
         {/* Stats */}

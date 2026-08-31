@@ -31,7 +31,7 @@ export const updateIdea = async (req, res) => {
     const idea = await Idea.findByIdAndUpdate(
       req.params.id,
       { status },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     res.json(idea);

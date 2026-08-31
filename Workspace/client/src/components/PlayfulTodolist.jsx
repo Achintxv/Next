@@ -72,10 +72,10 @@ export default function PlayfulTodolist() {
   };
 
   return (
-    <div className="h-full flex flex-col p-4 bg-zinc-800 rounded-2xl text-white">
+    <div className="h-full flex flex-col p-2 bg-zinc-800 rounded-2xl text-white">
 
       {/* 🔹 Top Bar */}
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-2">
         <h2 className="text-sm font-semibold text-zinc-400">Tasks</h2>
 
         <button
@@ -91,7 +91,7 @@ export default function PlayfulTodolist() {
         value={newTask}
         onChange={(e) => setNewTask(e.target.value)}
         placeholder="New task..."
-        className="mb-4 p-2 rounded-lg bg-zinc-700 outline-none"
+        className="mb-1 p-2 rounded-lg bg-zinc-700 outline-none"
       />
 
       {/* 🔹 Task List */}

@@ -1,169 +1,359 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { FaRegCirclePause } from "react-icons/fa6";
-import { GrResume } from "react-icons/gr";
-import { GrPowerReset } from "react-icons/gr";
+import React, { useEffect, useMemo, useState } from "react";
+import { FaPause, FaPlay, FaRotateRight } from "react-icons/fa6";
+
+const MIN_MINUTES = 15;
+const MAX_MINUTES = 60;
 
 export default function Pomodoro() {
   const [minutes, setMinutes] = useState(25);
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
+  const [completed, setCompleted] = useState(false);
 
   const totalSeconds = minutes * 60;
 
-  // ▶ Start timer
+  /* -----------------------------
+START
+----------------------------- */
+
   const startTimer = () => {
     setSecondsLeft(minutes * 60);
     setIsRunning(true);
+    setHasStarted(true);
+    setCompleted(false);
   };
 
-  // ⏸ Pause / ▶ Resume
-  const togglePause = () => {
+  /* -----------------------------
+PLAY / PAUSE
+----------------------------- */
+
+  const toggleTimer = () => {
+    if (!hasStarted) {
+      startTimer();
+      return;
+    }
+
     setIsRunning((prev) => !prev);
   };
 
-  // 🔄 Reset (proper)
+  /* -----------------------------
+RESET
+----------------------------- */
+
   const resetTimer = () => {
     setIsRunning(false);
-    setSecondsLeft(0); // go back to idle state
+    setSecondsLeft(0);
+    setHasStarted(false);
+    setCompleted(false);
   };
 
-  // ⏳ Countdown logic
+  /* -----------------------------
+COUNTDOWN
+----------------------------- */
+
   useEffect(() => {
     if (!isRunning) return;
 
-    const timer = setInterval(() => {
+    const interval = setInterval(() => {
       setSecondsLeft((prev) => {
         if (prev <= 1) {
           setIsRunning(false);
+          setCompleted(true);
           return 0;
         }
+
         return prev - 1;
       });
     }, 1000);
 
-    return () => clearInterval(timer);
+    return () => clearInterval(interval);
   }, [isRunning]);
 
-  // ⭕ Progress calculation
-  const progress =
-    secondsLeft === 0
-      ? 0
-      : ((totalSeconds - secondsLeft) / totalSeconds) * 100;
+  /* -----------------------------
+PROGRESS
+----------------------------- */
 
-  // ⏱ Format time
-  const formatTime = () => {
-    const m = Math.floor(secondsLeft / 60);
-    const s = secondsLeft % 60;
-    return `${m}:${s.toString().padStart(2, "0")}`;
+  const progress = useMemo(() => {
+    if (!hasStarted || totalSeconds === 0) {
+      return 0;
+    }
+
+    return ((totalSeconds - secondsLeft) / totalSeconds) * 100;
+  }, [secondsLeft, totalSeconds, hasStarted]);
+
+  /* -----------------------------
+CIRCLE
+----------------------------- */
+
+  const radius = 68;
+  const circumference = 2 * Math.PI * radius;
+
+  const strokeOffset = circumference - (progress / 100) * circumference;
+
+  /* -----------------------------
+FORMAT TIME
+----------------------------- */
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  /* -----------------------------
+STATUS
+----------------------------- */
+
+  const status = completed ? "Complete" : isRunning ? "Focus time" : "Paused";
+
   return (
-    <div className="h-full flex flex-col items-center justify-center bg-zinc-800 rounded-xl text-white relative">
+    <div className="relative h-full w-full bg-zinc-800 text-white overflow-hidden">
+      {/* =====================================================
+      HEADER
+  ====================================================== */}
 
-      {/* 🔹 Idle State */}
-      {!isRunning && secondsLeft === 0 && (
-        <div className="flex flex-col items-center gap-2">
+      <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-5 pt-5">
+        {/* TOP LEFT */}
 
-          <h2 className="text-lg text-zinc-400">Pomodoro</h2>
+        <div className="text-sm font-semibold text-zinc-200">Focus</div>
 
-          {/* ⏱ Time Selector */}
-          <input
-            type="range"
-            min={15}
-            max={60}
-            value={minutes}
-            onChange={(e) => setMinutes(Number(e.target.value))}
-            className="w-40"
-          />
+        {/* TOP RIGHT */}
 
-          <p className="text-lg">{minutes} min</p>
+        <div className="text-xs font-medium text-zinc-500">{minutes} min</div>
+      </div>
 
-          {/* ▶ Start */}
-          <button
-            onClick={startTimer}
-            className="px-4 py-1 bg-green-600 rounded-full hover:bg-green-700 transition"
-          >
-            Start
-          </button>
-        </div>
-      )}
+      {/* =====================================================
+      CENTER TIMER
+      ONLY APPEARS AFTER START
+  ====================================================== */}
 
-      {/* 🔹 Running / Paused State */}
-      {(isRunning || secondsLeft > 0) && (
-        <div className="flex flex-col items-center">
+      {hasStarted && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="relative">
+            {/* CIRCLE */}
 
-          {/* ⭕ Circle */}
-          <div className="relative flex items-center justify-center">
-            <svg className="w-40 h-40 rotate-[-90deg]">
+            <svg
+              width="170"
+              height="170"
+              viewBox="0 0 170 170"
+              className="-rotate-90"
+            >
+              {/* Background ring */}
+
               <circle
-                cx="80"
-                cy="80"
-                r="70"
-                stroke="#3f3f46"
-                strokeWidth="6"
+                cx="85"
+                cy="85"
+                r={radius}
                 fill="none"
+                stroke="currentColor"
+                strokeWidth="5"
+                className="text-zinc-700"
               />
 
+              {/* Progress ring */}
+
               <circle
-                cx="80"
-                cy="80"
-                r="70"
-                stroke="#22c55e"
-                strokeWidth="6"
+                cx="85"
+                cy="85"
+                r={radius}
                 fill="none"
-                strokeDasharray={440}
-                strokeDashoffset={440 - (440 * progress) / 100}
+                stroke="currentColor"
+                strokeWidth="5"
                 strokeLinecap="round"
-                className="transition-all duration-1000"
+                strokeDasharray={circumference}
+                strokeDashoffset={strokeOffset}
+                className="
+              text-green-500
+              transition-all
+              duration-1000
+              ease-linear
+            "
               />
             </svg>
 
-            {/* 🌱 Plant + Time */}
-            <div className="absolute flex flex-col items-center justify-center text-4xl gap-2">
-              <div>🌱</div>
-              <div className="text-sm">{formatTime()}</div>
+            {/* CENTER CONTENT */}
 
-              <div className="flex gap-2">
-                <button
-              onClick={togglePause}
-              className="px-2 py-1 bg-yellow-500 hover:bg-yellow-600 rounded-lg text-xs"
-            >
-              {isRunning? <FaRegCirclePause /> : <GrResume />}
-            </button>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <div
+                className={`
+              text-3xl
+              leading-none
+              mb-2
+              transition-transform
+              duration-500
+              ${isRunning ? "scale-110" : ""}
+            `}
+              >
+                {completed ? "🌿" : "🌱"}
+              </div>
 
-            {/* Reset */}
+              <div className="text-2xl font-semibold tracking-tight tabular-nums">
+                {formatTime(secondsLeft)}
+              </div>
+
+              <div className="mt-1 text-[10px] text-zinc-500">{status}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =====================================================
+BOTTOM CONTROLS
+====================================================== */}
+
+      <div className="absolute bottom-0 left-0 right-0 flex flex-col items-center px-5 pb-5">
+        {/* PLAY / PAUSE / RESTART + RESET */}
+
+        <div className="flex items-center gap-2">
+          {/* =================================================
+    MAIN ACTION BUTTON
+================================================== */}
+
+          <button
+            onClick={() => {
+              if (completed) {
+                startTimer();
+                return;
+              }
+
+              toggleTimer();
+            }}
+            className="
+    h-10
+    min-w-[90px]
+    px-4
+    rounded-full
+    bg-white
+    text-zinc-900
+    flex
+    items-center
+    justify-center
+    gap-2
+    text-xs
+    font-medium
+    hover:bg-zinc-200
+    active:scale-95
+    transition
+  "
+          >
+            {/* NOT STARTED */}
+
+            {!hasStarted && !completed && (
+              <>
+                <FaPlay className="text-[10px]" />
+                Start
+              </>
+            )}
+
+            {/* RUNNING */}
+
+            {hasStarted && isRunning && !completed && (
+              <>
+                <FaPause className="text-[10px]" />
+                Pause
+              </>
+            )}
+
+            {/* PAUSED */}
+
+            {hasStarted && !isRunning && !completed && (
+              <>
+                <FaPlay className="text-[10px]" />
+                Resume
+              </>
+            )}
+
+            {/* COMPLETED */}
+
+            {completed && (
+              <>
+                <FaRotateRight className="text-[10px]" />
+                Restart
+              </>
+            )}
+          </button>
+
+          {/* =================================================
+    RESET BUTTON
+
+    Only visible when:
+    - Paused
+    - Completed
+================================================== */}
+
+          {hasStarted && !isRunning && (
             <button
               onClick={resetTimer}
-              className="px-2 py-1 bg-red-500 hover:bg-red-600 rounded-lg text-xs"
+              className="
+      h-10
+      w-10
+      rounded-full
+      bg-zinc-700
+      text-zinc-300
+      flex
+      items-center
+      justify-center
+      hover:bg-zinc-600
+      hover:text-white
+      active:scale-95
+      transition
+    "
+              aria-label="Reset timer"
             >
-              <GrPowerReset />
+              <FaRotateRight className="text-xs" />
             </button>
+          )}
+        </div>
+
+        {/* =================================================
+DURATION
+
+```
+  Only visible before starting
+```
+
+================================================== */}
+
+        {!hasStarted && (
+          <div className="w-full max-w-[260px] mt-3">
+            <div className="rounded-xl bg-zinc-900/80 border border-zinc-700/50 px-3 py-2.5">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[10px] uppercase tracking-wider text-zinc-500">
+                  Duration
+                </span>
+
+                <span className="text-xs font-medium text-zinc-300">
+                  {minutes} min
+                </span>
+              </div>
+
+              <input
+                type="range"
+                min={MIN_MINUTES}
+                max={MAX_MINUTES}
+                step={5}
+                value={minutes}
+                onChange={(e) => setMinutes(Number(e.target.value))}
+                className="
+        w-full
+        h-1
+        accent-green-500
+        cursor-pointer
+      "
+              />
+
+              <div className="flex justify-between mt-1 text-[9px] text-zinc-600">
+                <span>{MIN_MINUTES}m</span>
+                <span>{MAX_MINUTES}m</span>
               </div>
             </div>
           </div>
-
-          {/* 🎮 Controls */}
-          {/* <div className="flex gap-2">
-
-            <button
-              onClick={togglePause}
-              className="px-2 py-1 bg-yellow-500 hover:bg-yellow-600 rounded-lg text-xs"
-            >
-              {isRunning? <FaRegCirclePause /> : <GrResume />}
-            </button>
-
-            <button
-              onClick={resetTimer}
-              className="px-2 py-1 bg-red-500 hover:bg-red-600 rounded-lg text-xs"
-            >
-              <GrPowerReset />
-            </button>
-
-          </div> */}
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

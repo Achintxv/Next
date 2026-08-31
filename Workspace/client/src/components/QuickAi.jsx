@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { askAI } from "@/services/aiService";
 
 export default function QuickAI() {
-  const [type, setType] = useState("summarize");
+  const [type, setType] = useState("ask");
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -48,7 +48,7 @@ export default function QuickAI() {
         value={input}
         onChange={(e) => setInput(e.target.value)}
         placeholder="Type something..."
-        className="p-2 mb-3 rounded bg-zinc-700 text-sm outline-none"
+        className="p-2 mb-3 rounded bg-zinc-700 text-sm outline-none wrap-break-word"
       />
 
       {/* 🔹 Button */}
