@@ -1,12 +1,12 @@
-import React from 'react'
-import Home from './Home'
+import { redirect } from "next/navigation";
+import { getCurrentUserFromCookies } from "@/lib/auth";
 
-const page = () => {
-  return (
-    <div>
-      <Home></Home>
-    </div>
-  )
+export default async function HomePage() {
+  const user = await getCurrentUserFromCookies();
+
+  if (user) {
+    redirect("/dashboard");
+  }
+
+  redirect("/login");
 }
-
-export default page
